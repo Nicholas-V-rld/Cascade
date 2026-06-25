@@ -153,4 +153,15 @@ describe("runWaterfall", () => {
     expect(allocated + result.free).toBe(inflow);
     expect(result.inflow).toBe(inflow);
   });
+
+  it("respects priority order even when a percent bucket outranks a fill bucket", () => {
+    const buckets: Bucket[] = [
+      { id: "a", name: "Tithe",   priority: 0, balance: 0, rule: { kind: "percent", rate: 0.1 } },
+      { id: "b", name: "Buffer",  priority: 1, balance: 0, rule: { kind: "fill", target: 100_00 } },
+    ];
+    const r = runWaterfall(100_00, buckets);
+    expect(r.allocations[0]).toMatchObject({ bucketName: "Tithe",  amount: 10_00 });
+    expect(r.allocations[1]).toMatchObject({ bucketName: "Buffer", amount: 90_00 });
+    expect(r.free).toBe(0);
+  });
 });

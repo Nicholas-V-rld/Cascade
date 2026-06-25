@@ -1,11 +1,11 @@
-import Image from "next/image";
 import Link from "next/link";
 
 export function Header() {
   return (
     <header className="mb-8 flex items-center justify-between">
       <Link href="/" className="flex items-center gap-3 text-teal-600">
-        <Image
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
           src="/logo-mark.svg"
           alt=""
           width={36}

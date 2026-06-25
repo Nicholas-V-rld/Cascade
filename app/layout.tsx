@@ -1,3 +1,4 @@
+import { AppProviders } from "@/components/AppProviders";
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
@@ -13,12 +14,21 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  applicationName: "Cascade",
   title: "Cascade",
   description: "Allocate before you spend.",
   manifest: "/manifest.webmanifest",
   icons: {
     icon: "/favicon.ico",
     apple: "/apple-touch-icon.png",
+  },
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Cascade",
+  },
+  formatDetection: {
+    telephone: false,
   },
 };
 
@@ -36,7 +46,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {children}
+        <AppProviders>{children}</AppProviders>
       </body>
     </html>
   );

@@ -1,1 +1,39 @@
-// Pass 2: shared domain types
+export type AllocationRule =
+  | { kind: "fill"; target: number }
+  | { kind: "percent"; rate: number };
+
+export interface Bucket {
+  id: string;
+  name: string;
+  priority: number;
+  balance: number;
+  rule: AllocationRule;
+}
+
+export interface Allocation {
+  bucketId: string;
+  bucketName: string;
+  amount: number;
+}
+
+export interface WaterfallResult {
+  inflow: number;
+  allocations: Allocation[];
+  free: number;
+}
+
+export interface InflowRecord {
+  id: string;
+  createdAt: string;
+  currency: "NGN" | "USD";
+  originalAmount: number;
+  fxRate: number | null;
+  amountNGN: number;
+  result: WaterfallResult;
+}
+
+export interface Settings {
+  id: string;
+  baseCurrency: "NGN";
+  onboarded: boolean;
+}

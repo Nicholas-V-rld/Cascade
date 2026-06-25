@@ -1,0 +1,23 @@
+# Cascade — Cursor rules
+
+You are working on Cascade, a single-user finance PWA (Next.js 15 App Router, TS, Tailwind,
+Dexie, Serwist). Read CLAUDE.md before making changes.
+
+## Hard rules
+- Money is ALWAYS integer minor units (kobo). Never store or compute money as a float.
+  Convert/format only at the display boundary via lib/money.ts.
+- lib/waterfall.ts must stay PURE (no I/O, no Dexie, no React). Keep its tests green.
+  The invariant sum(allocations) + free === inflow must always hold.
+- No auth, no backend, no remote DB in v1. Persistence is IndexedDB (Dexie) only.
+- Do not add features outside v1 scope (no spend tracking, categories, charts, investing
+  picker, sync, login). If you think one is needed, add a `// v2:` comment, don't build it.
+
+## Style
+- TypeScript strict, no `any`, no non-null `!` unless justified with a comment.
+- Pure logic in lib/, side effects at the edges, components presentational.
+- Tailwind only; flat design, primary teal #0D9488; sentence case in UI copy.
+- Small, focused commits. After each pass, run typecheck + tests before moving on.
+
+## When unsure
+Prefer the smaller solution that ships. This app's value is being opened every day —
+guard simplicity over completeness.

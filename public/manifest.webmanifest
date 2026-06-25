@@ -1,0 +1,10 @@
+{
+  "name": "Cascade",
+  "short_name": "Cascade",
+  "description": "Allocate before you spend.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#0D9488",
+  "icons": []
+}

@@ -6,12 +6,14 @@ const revision =
   spawnSync("git", ["rev-parse", "HEAD"], { encoding: "utf-8" }).stdout?.trim() ??
   crypto.randomUUID();
 
+const nextConfig: NextConfig = {};
+
 const withSerwist = withSerwistInit({
   additionalPrecacheEntries: [{ url: "/~offline", revision }],
   swSrc: "app/sw.ts",
   swDest: "public/sw.js",
 });
 
-const nextConfig: NextConfig = {};
-
-export default withSerwist(nextConfig);
+export default process.env.NODE_ENV === "production"
+  ? withSerwist(nextConfig)
+  : nextConfig;

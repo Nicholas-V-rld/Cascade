@@ -40,3 +40,21 @@ export function parseToMinor(input: string): number | null {
   if (!Number.isFinite(num) || num < 0) return null;
   return toMinor(num);
 }
+
+function assertValidRate(rate: number | null | undefined): asserts rate is number {
+  if (rate == null || !Number.isFinite(rate) || rate <= 0) {
+    throw new Error("Invalid FX rate");
+  }
+}
+
+/** USD cents → NGN kobo. rate = NGN per 1 USD. */
+export const usdToNgn = (usdCents: number, rate: number): number => {
+  assertValidRate(rate);
+  return Math.round(usdCents * rate);
+};
+
+/** NGN kobo → USD cents. rate = NGN per 1 USD. */
+export const ngnToUsd = (ngnKobo: number, rate: number): number => {
+  assertValidRate(rate);
+  return Math.round(ngnKobo / rate);
+};

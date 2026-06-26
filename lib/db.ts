@@ -1,5 +1,5 @@
 import Dexie, { type EntityTable } from "dexie";
-import type { Bucket, InflowRecord, Settings, WaterfallResult } from "./types";
+import type { Bucket, InflowRecord, Settings, Spend, WaterfallResult } from "./types";
 import { runWaterfall } from "./waterfall";
 
 const SETTINGS_ID = "settings";
@@ -8,6 +8,7 @@ export class CascadeDB extends Dexie {
   buckets!: EntityTable<Bucket, "id">;
   inflows!: EntityTable<InflowRecord, "id">;
   settings!: EntityTable<Settings, "id">;
+  spends!: EntityTable<Spend, "id">;
 
   constructor() {
     super("cascade");
@@ -15,6 +16,12 @@ export class CascadeDB extends Dexie {
       buckets: "id, priority",
       inflows: "id, createdAt",
       settings: "id",
+    });
+    this.version(2).stores({
+      buckets: "id, priority",
+      inflows: "id, createdAt",
+      settings: "id",
+      spends: "id, createdAt",
     });
   }
 }
@@ -59,8 +66,22 @@ export async function ensureSeeded(): Promise<void> {
       id: SETTINGS_ID,
       baseCurrency: "NGN",
       onboarded: false,
+      userRate: null,
     });
   }
+}
+
+/** Read-only queries for useLiveQuery — never write here. */
+export function queryBucketsOrdered(): Promise<Bucket[]> {
+  return db.buckets.orderBy("priority").toArray();
+}
+
+export function querySettings(): Promise<Settings | undefined> {
+  return db.settings.get(SETTINGS_ID);
+}
+
+export function queryInflowsDesc(): Promise<InflowRecord[]> {
+  return db.inflows.orderBy("createdAt").reverse().toArray();
 }
 
 export async function getBuckets(): Promise<Bucket[]> {

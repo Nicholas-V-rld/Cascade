@@ -8,6 +8,8 @@ export interface Bucket {
   priority: number;
   balance: number;
   rule: AllocationRule;
+  /** ISO date YYYY-MM-DD — optional goal deadline for fill buckets. */
+  deadline?: string;
 }
 
 export interface Allocation {
@@ -36,4 +38,13 @@ export interface Settings {
   id: string;
   baseCurrency: "NGN";
   onboarded: boolean;
+  /** NGN per 1 USD — the rate you actually get when you cash out. */
+  userRate?: number | null;
+}
+
+export interface Spend {
+  id: string;
+  createdAt: number;
+  amountMinor: number;
+  note?: string;
 }

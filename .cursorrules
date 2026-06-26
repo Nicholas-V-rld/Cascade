@@ -8,6 +8,10 @@ Dexie, Serwist). Read CLAUDE.md before making changes.
   Convert/format only at the display boundary via lib/money.ts.
 - lib/waterfall.ts must stay PURE (no I/O, no Dexie, no React). Keep its tests green.
   The invariant sum(allocations) + free === inflow must always hold.
+- Spendable is DERIVED (`Σ inflow free − Σ spend amounts`), never stored as its own balance.
+- settings.userRate is NGN per $1 and the sole conversion source; never use a fetched rate
+  as the source of truth.
+- Spend-check is a single envelope guardrail — no categories, no spend-history screen.
 - No auth, no backend, no remote DB in v1. Persistence is IndexedDB (Dexie) only.
 - Do not add features outside v1 scope (no spend tracking, categories, charts, investing
   picker, sync, login). If you think one is needed, add a `// v2:` comment, don't build it.

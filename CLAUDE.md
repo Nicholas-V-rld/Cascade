@@ -21,10 +21,14 @@ tested. Invariant: sum(allocations) + free === inflow, always. Don't break this.
 - Rule `fill`: take up to (target − balance). Rule `percent`: take rate% of what reaches it.
 - Waterfall: run buckets by ascending priority; remainder cascades down; leftover = free.
 - Free: the money that is genuinely spendable after buckets are served.
+- Spendable: **derived**, never stored — `Σ(inflow.result.free) − Σ(spend.amountMinor)`.
+- userRate: NGN per 1 USD in `settings.userRate`; sole source for USD↔NGN conversion.
+- Spend-check: a single spendable envelope guardrail, not categorized expense tracking.
 
 ## v1 scope discipline
-Build ONLY: buckets, "money came in" → allocation, Move Fund progress, CSV export, PWA.
-NOT in v1: spend tracking, categories, charts, investment picker, sync, login.
+Build ONLY: buckets, "money came in" → allocation, Move Fund progress + runway, inflow
+history, spend-check guardrail, USD↔NGN converter (your rate), CSV export, PWA.
+NOT in v1: categorized spend tracking, charts, investment picker, sync, login.
 If tempted to add one of those, leave a `// v2:` comment instead.
 
 ## Conventions

@@ -40,6 +40,8 @@ export interface Settings {
   onboarded: boolean;
   /** NGN per 1 USD — the rate you actually get when you cash out. */
   userRate?: number | null;
+  /** NGN kobo per 30-day month when inflow history is too thin for auto pace. */
+  manualMoveFundMonthlyMinor?: number | null;
 }
 
 export interface Spend {

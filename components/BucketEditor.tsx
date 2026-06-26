@@ -208,18 +208,33 @@ export function BucketEditor({ initialBuckets, onSaved }: BucketEditorProps) {
                   </button>
 
                   {bucket.rule.kind === "fill" ? (
-                    <input
-                      type="text"
-                      inputMode="decimal"
-                      placeholder="Target (NGN)"
-                      value={
-                        bucket.rule.target > 0
-                          ? String(fromMinor(bucket.rule.target))
-                          : ""
-                      }
-                      onChange={(e) => updateFillTarget(bucket.id, e.target.value)}
-                      className="w-32 rounded-lg border border-neutral-300 px-2 py-1 text-sm"
-                    />
+                    <>
+                      <input
+                        type="text"
+                        inputMode="decimal"
+                        placeholder="Target (NGN)"
+                        value={
+                          bucket.rule.target > 0
+                            ? String(fromMinor(bucket.rule.target))
+                            : ""
+                        }
+                        onChange={(e) => updateFillTarget(bucket.id, e.target.value)}
+                        className="w-32 rounded-lg border border-neutral-300 px-2 py-1 text-sm"
+                      />
+                      {bucket.name === "Move Fund" && (
+                        <input
+                          type="date"
+                          value={bucket.deadline ?? ""}
+                          onChange={(e) =>
+                            updateBucket(bucket.id, {
+                              deadline: e.target.value || undefined,
+                            })
+                          }
+                          className="rounded-lg border border-neutral-300 px-2 py-1 text-sm text-neutral-700"
+                          aria-label="Move Fund deadline"
+                        />
+                      )}
+                    </>
                   ) : (
                     <input
                       type="number"

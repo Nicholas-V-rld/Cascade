@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { BucketBar } from "@/components/BucketBar";
 import { Header } from "@/components/Header";
@@ -10,16 +10,19 @@ import {
   queryInflowsDesc,
   querySettings,
   querySpends,
+  updateSettings,
 } from "@/lib/db";
 import { downloadCSV } from "@/lib/csv";
 import { computeSpendable } from "@/lib/spendable";
-import { formatNGN } from "@/lib/money";
+import { computeRunway, deriveMoveFundPace } from "@/lib/runway";
+import { formatNGN, parseToMinor } from "@/lib/money";
 import { SpendCheck } from "@/components/SpendCheck";
 import Link from "next/link";
 
 export default function HomePage() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [, setRefresh] = useState(0);
+  const [manualPaceInput, setManualPaceInput] = useState("");
 
   const buckets = useLiveQuery(queryBucketsOrdered);
   const settings = useLiveQuery(querySettings);
@@ -31,6 +34,35 @@ export default function HomePage() {
 
   const moveFund = buckets?.find((b) => b.name === "Move Fund");
   const otherBuckets = buckets?.filter((b) => b.name !== "Move Fund") ?? [];
+
+  const historyPace = useMemo(() => {
+    if (!moveFund || !inflows) return null;
+    return deriveMoveFundPace(inflows, moveFund.id);
+  }, [moveFund, inflows]);
+
+  const useManualPace = historyPace === null || historyPace <= 0;
+
+  const monthlyPaceKobo = useManualPace
+    ? settings?.manualMoveFundMonthlyMinor ?? 0
+    : historyPace ?? 0;
+
+  const runway = useMemo(() => {
+    if (
+      !moveFund ||
+      moveFund.rule.kind !== "fill" ||
+      moveFund.rule.target <= 0 ||
+      monthlyPaceKobo <= 0
+    ) {
+      return null;
+    }
+    return computeRunway({
+      now: new Date(),
+      target: moveFund.rule.target,
+      currentBalance: moveFund.balance,
+      monthlyPaceKobo,
+      deadline: moveFund.deadline,
+    });
+  }, [moveFund, monthlyPaceKobo]);
 
   function handleExport() {
     if (inflows && inflows.length > 0) {
@@ -61,7 +93,28 @@ export default function HomePage() {
         </div>
       )}
 
-      {moveFund && <BucketBar bucket={moveFund} variant="hero" />}
+      {moveFund && (
+        <BucketBar
+          bucket={moveFund}
+          variant="hero"
+          runway={runway}
+          monthlyPaceKobo={monthlyPaceKobo > 0 ? monthlyPaceKobo : null}
+          showManualPace={useManualPace}
+          manualPaceInput={
+            manualPaceInput ||
+            (settings?.manualMoveFundMonthlyMinor != null &&
+            settings.manualMoveFundMonthlyMinor > 0
+              ? String(settings.manualMoveFundMonthlyMinor / 100)
+              : "")
+          }
+          onManualPaceInputChange={setManualPaceInput}
+          onSaveManualPace={() => {
+            const minor = parseToMinor(manualPaceInput);
+            if (minor === null || minor <= 0) return;
+            void updateSettings({ manualMoveFundMonthlyMinor: minor });
+          }}
+        />
+      )}
 
       {spendable !== null && (
         <div className="mt-6 rounded-xl border border-neutral-200 bg-white px-4 py-3">

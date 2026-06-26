@@ -1,14 +1,30 @@
 "use client";
 
 import type { Bucket } from "@/lib/types";
+import type { RunwayResult } from "@/lib/runway";
 import { formatNGN, formatNGNCompact } from "@/lib/money";
 
 interface BucketBarProps {
   bucket: Bucket;
   variant?: "hero" | "thin";
+  runway?: RunwayResult | null;
+  monthlyPaceKobo?: number | null;
+  showManualPace?: boolean;
+  manualPaceInput?: string;
+  onManualPaceInputChange?: (value: string) => void;
+  onSaveManualPace?: () => void;
 }
 
-export function BucketBar({ bucket, variant = "thin" }: BucketBarProps) {
+export function BucketBar({
+  bucket,
+  variant = "thin",
+  runway,
+  monthlyPaceKobo,
+  showManualPace,
+  manualPaceInput,
+  onManualPaceInputChange,
+  onSaveManualPace,
+}: BucketBarProps) {
   const target =
     bucket.rule.kind === "fill" ? bucket.rule.target : null;
   const progress =
@@ -36,6 +52,53 @@ export function BucketBar({ bucket, variant = "thin" }: BucketBarProps) {
                 style={{ width: `${progress ?? 0}%` }}
               />
             </div>
+            {showManualPace && (
+              <div className="mt-4 space-y-2">
+                <label
+                  htmlFor="manual-pace"
+                  className="block text-xs font-medium text-neutral-600"
+                >
+                  Monthly contribution (NGN)
+                </label>
+                <div className="flex gap-2">
+                  <input
+                    id="manual-pace"
+                    type="text"
+                    inputMode="decimal"
+                    placeholder="50000"
+                    value={manualPaceInput ?? ""}
+                    onChange={(e) => onManualPaceInputChange?.(e.target.value)}
+                    className="flex-1 rounded-lg border border-neutral-300 px-3 py-2 text-sm"
+                  />
+                  <button
+                    type="button"
+                    onClick={onSaveManualPace}
+                    className="rounded-lg bg-neutral-100 px-3 py-2 text-sm font-medium text-neutral-700 hover:bg-neutral-200"
+                  >
+                    Save
+                  </button>
+                </div>
+              </div>
+            )}
+            {runway && monthlyPaceKobo != null && monthlyPaceKobo > 0 && runway.completionDate && (
+              <p className="mt-4 text-sm text-neutral-600">
+                At ~{formatNGNCompact(monthlyPaceKobo)}/mo → on track for{" "}
+                {runway.completionDate.toLocaleDateString("en-NG", {
+                  month: "short",
+                  year: "numeric",
+                })}
+                {runway.deadlineWeeksDelta != null && (
+                  <>
+                    {" "}
+                    (
+                    {Math.abs(runway.deadlineWeeksDelta)} week
+                    {Math.abs(runway.deadlineWeeksDelta) === 1 ? "" : "s"}{" "}
+                    {runway.deadlineWeeksDelta >= 0 ? "ahead" : "behind"} your
+                    goal)
+                  </>
+                )}
+              </p>
+            )}
           </>
         ) : (
           <p className="mt-2 text-lg text-neutral-500">

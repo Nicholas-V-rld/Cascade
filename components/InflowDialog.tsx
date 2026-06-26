@@ -3,16 +3,22 @@
 import { useMemo, useState } from "react";
 import type { Bucket } from "@/lib/types";
 import { previewWaterfall, saveInflow } from "@/lib/db";
-import { parseToMinor } from "@/lib/money";
+import { parseToMinor, usdToNgn } from "@/lib/money";
 import { AllocationResult } from "./AllocationResult";
 
 interface InflowDialogProps {
   buckets: Bucket[];
+  defaultFxRate?: number | null;
   onClose: () => void;
   onSaved: () => void;
 }
 
-export function InflowDialog({ buckets, onClose, onSaved }: InflowDialogProps) {
+export function InflowDialog({
+  buckets,
+  defaultFxRate,
+  onClose,
+  onSaved,
+}: InflowDialogProps) {
   const [amount, setAmount] = useState("");
   const [useUsd, setUseUsd] = useState(false);
   const [fxRate, setFxRate] = useState("");
@@ -25,7 +31,11 @@ export function InflowDialog({ buckets, onClose, onSaved }: InflowDialogProps) {
     if (!useUsd) return minor;
     const rate = Number(fxRate);
     if (!Number.isFinite(rate) || rate <= 0) return null;
-    return Math.round(minor * rate);
+    try {
+      return usdToNgn(minor, rate);
+    } catch {
+      return null;
+    }
   }, [amount, useUsd, fxRate]);
 
   const preview = useMemo(() => {
@@ -102,7 +112,18 @@ export function InflowDialog({ buckets, onClose, onSaved }: InflowDialogProps) {
             <input
               type="checkbox"
               checked={useUsd}
-              onChange={(e) => setUseUsd(e.target.checked)}
+              onChange={(e) => {
+                const checked = e.target.checked;
+                setUseUsd(checked);
+                if (
+                  checked &&
+                  fxRate === "" &&
+                  defaultFxRate != null &&
+                  defaultFxRate > 0
+                ) {
+                  setFxRate(String(defaultFxRate));
+                }
+              }}
               className="rounded border-neutral-300 text-teal-600"
             />
             Enter in USD

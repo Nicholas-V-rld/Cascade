@@ -5,7 +5,11 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { BucketBar } from "@/components/BucketBar";
 import { Header } from "@/components/Header";
 import { InflowDialog } from "@/components/InflowDialog";
-import { db, ensureSeeded } from "@/lib/db";
+import {
+  queryBucketsOrdered,
+  queryInflowsDesc,
+  querySettings,
+} from "@/lib/db";
 import { downloadCSV } from "@/lib/csv";
 import Link from "next/link";
 
@@ -13,20 +17,9 @@ export default function HomePage() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [, setRefresh] = useState(0);
 
-  const buckets = useLiveQuery(async () => {
-    await ensureSeeded();
-    return db.buckets.orderBy("priority").toArray();
-  });
-
-  const settings = useLiveQuery(async () => {
-    await ensureSeeded();
-    return db.settings.get("settings");
-  });
-
-  const inflows = useLiveQuery(async () => {
-    await ensureSeeded();
-    return db.inflows.orderBy("createdAt").reverse().toArray();
-  });
+  const buckets = useLiveQuery(queryBucketsOrdered);
+  const settings = useLiveQuery(querySettings);
+  const inflows = useLiveQuery(queryInflowsDesc);
 
   const moveFund = buckets?.find((b) => b.name === "Move Fund");
   const otherBuckets = buckets?.filter((b) => b.name !== "Move Fund") ?? [];
@@ -92,6 +85,7 @@ export default function HomePage() {
       {dialogOpen && (
         <InflowDialog
           buckets={buckets}
+          defaultFxRate={settings?.userRate}
           onClose={() => setDialogOpen(false)}
           onSaved={() => setRefresh((n) => n + 1)}
         />

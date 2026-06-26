@@ -40,6 +40,16 @@ export function BucketEditor({ initialBuckets, onSaved }: BucketEditorProps) {
   }
 
   function updateFillTarget(id: string, majorStr: string) {
+    if (majorStr.trim() === "") {
+      setBuckets((prev) =>
+        prev.map((b) =>
+          b.id === id && b.rule.kind === "fill"
+            ? { ...b, rule: { kind: "fill", target: 0 } }
+            : b,
+        ),
+      );
+      return;
+    }
     const minor = parseToMinor(majorStr);
     if (minor === null) return;
     setBuckets((prev) =>
@@ -202,12 +212,12 @@ export function BucketEditor({ initialBuckets, onSaved }: BucketEditorProps) {
                       type="text"
                       inputMode="decimal"
                       placeholder="Target (NGN)"
-                      defaultValue={
+                      value={
                         bucket.rule.target > 0
                           ? String(fromMinor(bucket.rule.target))
                           : ""
                       }
-                      onBlur={(e) => updateFillTarget(bucket.id, e.target.value)}
+                      onChange={(e) => updateFillTarget(bucket.id, e.target.value)}
                       className="w-32 rounded-lg border border-neutral-300 px-2 py-1 text-sm"
                     />
                   ) : (

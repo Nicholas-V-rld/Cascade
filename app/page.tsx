@@ -9,8 +9,12 @@ import {
   queryBucketsOrdered,
   queryInflowsDesc,
   querySettings,
+  querySpends,
 } from "@/lib/db";
 import { downloadCSV } from "@/lib/csv";
+import { computeSpendable } from "@/lib/spendable";
+import { formatNGN } from "@/lib/money";
+import { SpendCheck } from "@/components/SpendCheck";
 import Link from "next/link";
 
 export default function HomePage() {
@@ -20,6 +24,10 @@ export default function HomePage() {
   const buckets = useLiveQuery(queryBucketsOrdered);
   const settings = useLiveQuery(querySettings);
   const inflows = useLiveQuery(queryInflowsDesc);
+  const spends = useLiveQuery(querySpends);
+
+  const spendable =
+    inflows && spends ? computeSpendable(inflows, spends) : null;
 
   const moveFund = buckets?.find((b) => b.name === "Move Fund");
   const otherBuckets = buckets?.filter((b) => b.name !== "Move Fund") ?? [];
@@ -54,6 +62,23 @@ export default function HomePage() {
       )}
 
       {moveFund && <BucketBar bucket={moveFund} variant="hero" />}
+
+      {spendable !== null && (
+        <div className="mt-6 rounded-xl border border-neutral-200 bg-white px-4 py-3">
+          <p className="text-xs font-medium uppercase tracking-wide text-neutral-500">
+            Spendable
+          </p>
+          <p className="mt-1 text-2xl font-semibold text-neutral-900">
+            {formatNGN(spendable)}
+          </p>
+        </div>
+      )}
+
+      {spendable !== null && (
+        <div className="mt-4">
+          <SpendCheck spendable={spendable} />
+        </div>
+      )}
 
       {otherBuckets.length > 0 && (
         <section className="mt-6 space-y-4">

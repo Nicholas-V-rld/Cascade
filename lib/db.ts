@@ -84,6 +84,24 @@ export function queryInflowsDesc(): Promise<InflowRecord[]> {
   return db.inflows.orderBy("createdAt").reverse().toArray();
 }
 
+export function querySpends(): Promise<Spend[]> {
+  return db.spends.orderBy("createdAt").toArray();
+}
+
+export async function logSpend(
+  amountMinor: number,
+  note?: string,
+): Promise<Spend> {
+  const spend: Spend = {
+    id: crypto.randomUUID(),
+    createdAt: Date.now(),
+    amountMinor,
+    ...(note ? { note } : {}),
+  };
+  await db.spends.add(spend);
+  return spend;
+}
+
 export async function getBuckets(): Promise<Bucket[]> {
   await ensureSeeded();
   return db.buckets.orderBy("priority").toArray();

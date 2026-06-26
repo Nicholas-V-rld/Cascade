@@ -97,6 +97,13 @@ export default function HomePage() {
           Money came in
         </button>
 
+        <Link
+          href="/history"
+          className="block w-full text-center text-sm text-neutral-600 hover:text-teal-600"
+        >
+          Inflow history
+        </Link>
+
         <button
           type="button"
           onClick={handleExport}
